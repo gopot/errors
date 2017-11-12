@@ -31,6 +31,10 @@ var testFactories = []struct {
 		Alias:        `Default ErrorFactory with Default KVStorage`,
 		ErrorFactory: errors.NewErrorFactory(errors.NewDefaultKVStorage),
 	},
+	{
+		Alias:        `Default ErrorFactory with <nil> KVStorage`,
+		ErrorFactory: errors.NewErrorFactory(func(pairs ...struct{ Key, Value interface{} }) errors.KVStorage { return nil }),
+	},
 }
 
 func Test_ErrorFactoryNewError(t *testing.T) {

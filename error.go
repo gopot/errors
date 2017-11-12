@@ -45,20 +45,29 @@ type detailedError struct {
 	errorFactory ErrorFactory
 }
 
-// Implements `error` interface and returns message of underliying error.
+// Implements `error` interface and returns message of underlying error.
 func (this *detailedError) Error() string {
+	if this.error == nil {
+		return ""
+	}
 	return this.error.Error()
 }
 
 // Returns error message followed by concatenation of following blocks:
 // * if Detail `key` implements `Stringer` interface, the block starts with key.String() header, otherwise it is skept.
-// * if Detail `value` implements `Stringer` interface, the block contains value.String(), otherwise it is skept.
+// * if Detail `value` implements `Stringer` interface, the block contains value.String(), otherwise it is skipped.
 func (this *detailedError) Detailed() string {
+	if this.details == nil {
+		return this.Error()
+	}
 	return fmt.Sprintln(this.Error()) + this.details.String()
 }
 
 // Returns last added Detail `value` for provided `key` and boolean flag wheather the key was found.
 func (this *detailedError) Get(key interface{}) (interface{}, bool) {
+	if this.details == nil {
+		return nil, false
+	}
 	return this.details.GetValue(key)
 }
 

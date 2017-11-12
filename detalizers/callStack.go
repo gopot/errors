@@ -42,6 +42,11 @@ type callStackValue struct {
 }
 
 // Represents errors.Detalizer implementation to generate call stack detail!
+//
+// The argument `skipFrames` is the number of stack frames to skip in report starting from its caller,
+// and argument `nestLevel` is the maximum possible number of stack frames to be reported.
+// For.ex. in case new created detaliser should not report its caller and has to report
+// only one function it should be set as following: `csd := NewCallStackDetalizer(1,1)`
 func NewCallStackDetalizer(skipFrames int, nestLevel int) func() []struct{ Key, Value interface{} } {
 	return func() []struct{ Key, Value interface{} } {
 

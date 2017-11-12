@@ -38,7 +38,7 @@ func Test_NewCallStackDetalizerHappyPath(t *testing.T) {
 		ExpectedValueString string
 	}{
 		TestAlias:   `Valid detalizer with chain of calls`,
-		SkipFrames:  0, // Should not take NewCallStackDetalizer clousure inco account
+		SkipFrames:  0, // Should not take NewCallStackDetalizer closure into account
 		NestLevel:   5, // Must take only test call
 		ExpectedKey: detalizers.CallStackDetailKey,
 		ExpectedValueString: fmt.Sprintln("") + fmt.Sprintln("\tgithub.com/gopot/errors/detalizers_test.Test_NewCallStackDetalizerHappyPath.func1.1 callStack_test.go:56") +

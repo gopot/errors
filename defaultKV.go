@@ -18,58 +18,65 @@ import "fmt"
 
 // Represents default KV storage implementation as linked list.
 type defaultKVStorage struct {
-	parent *defaultKVStorage
-	Key    interface{}
-	Value  interface{}
+	parent  *defaultKVStorage
+	element *struct {
+		Key   interface{}
+		Value interface{}
+	}
 }
 
 // Implements KVStorage.GetValue(key interface{})(interface{}, bool) method
 func (this *defaultKVStorage) GetValue(key interface{}) (value interface{}, found bool) {
-	if this != nil {
-		if this.Key == key {
-			value = this.Value
-			found = true
-		} else if this.parent != nil {
-			value, found = this.parent.GetValue(key)
-		}
+	if this.element != nil && this.element.Key == key {
+		return this.element.Value, true
 	}
-	return
+
+	if this.parent != nil {
+		return this.parent.GetValue(key)
+	}
+
+	return nil, false
 }
 
 // Implements Stringer interface.
 //
 // It loops over all KVPairs in the list from last to first and concatenates the following:
-// * if KVPair.Key implements fmt.Stringer interface, it prints it with new line at the end
-// * if KVPair.Value implements fmt.Stringer interface, it prints it with new line at the end
+// * if both Key and Value implement fmt.Stringer or are strings it prints them as 'Key : Value' with new line at the end
+// * if only KVPair.Key implements fmt.Stringer interface or is a string, it prints it with new line at the end
+// * if only KVPair.Value implements fmt.Stringer interface or is a string, it prints it with new line at the end
 func (this *defaultKVStorage) String() string {
 	ret := ""
-	if this != nil {
+	if this.element != nil {
+
 		var key, value string
-		if ks, ok := this.Key.(fmt.Stringer); ok {
+
+		switch ks := (this.element.Key).(type) {
+		case fmt.Stringer:
 			key = ks.String()
-		} else if ks, ok := this.Key.(string); ok {
+		case string:
 			key = ks
-		}
-		if vs, ok := this.Value.(fmt.Stringer); ok {
-			value = vs.String()
-		} else if vs, ok := this.Value.(string); ok {
-			value = vs
-		}
-		if key != "" && value != "" {
-			ret += fmt.Sprintln(key, ":", value)
-		} else {
-			if key != "" {
-				ret += fmt.Sprintln(key)
-			}
-			if value != "" {
-				ret += fmt.Sprintln(value)
-			}
+		default:
 		}
 
-		if this.parent != nil {
-			ret += this.parent.String()
+		switch vs := (this.element.Value).(type) {
+		case fmt.Stringer:
+			value = vs.String()
+		case string:
+			value = vs
+		default:
+		}
+
+		if key != "" && value != "" {
+			ret += fmt.Sprintln(key, ":", value)
+		} else if key+value != "" {
+			ret += fmt.Sprintln(key + value)
 		}
 	}
+
+	if this.parent != nil {
+		ret += this.parent.String()
+	}
+
 	return ret
 }
 
@@ -77,13 +84,21 @@ func (this *defaultKVStorage) String() string {
 // The default KVStorage accepts detail keys only of comparable(k1==k2) type(s), otherwise it will panic.
 // In case of two or more details have exactly the same Key it returns the last one on GetValue call.
 // At the same time, it will print on .String() call all entries.
+//
+// Implements fmt.Stringer with the following logic:
+// It loops over all KVPairs in the list from last to first and concatenates the following:
+// * if both Key and Value implement fmt.Stringer or are strings it prints them as 'Key : Value' with new line at the end
+// * if only KVPair.Key implements fmt.Stringer interface or is a string, it prints it with new line at the end
+// * if only KVPair.Value implements fmt.Stringer interface or is a string, it prints it with new line at the end
 func NewDefaultKVStorage(pairs ...struct{ Key, Value interface{} }) KVStorage {
-	kv := new(defaultKVStorage)
+	if len(pairs) == 0 {
+		return new(defaultKVStorage)
+	}
+	var kv *defaultKVStorage
 	for _, pair := range pairs {
 		kvNew := &defaultKVStorage{
-			parent: kv,
-			Key:    pair.Key,
-			Value:  pair.Value,
+			parent:  kv,
+			element: &struct{ Key, Value interface{} }{Key: pair.Key, Value: pair.Value},
 		}
 		kv = kvNew
 	}
