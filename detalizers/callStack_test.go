@@ -30,6 +30,9 @@ func C() { D() }
 var D = func() {}
 
 func Test_NewCallStackDetalizerHappyPath(t *testing.T) {
+
+	t.Parallel()
+
 	testCase := struct {
 		TestAlias           string
 		SkipFrames          int
@@ -41,11 +44,11 @@ func Test_NewCallStackDetalizerHappyPath(t *testing.T) {
 		SkipFrames:  0, // Should not take NewCallStackDetalizer closure into account
 		NestLevel:   5, // Must take only test call
 		ExpectedKey: detalizers.CallStackDetailKey,
-		ExpectedValueString: fmt.Sprintln("") + fmt.Sprintln("\tgithub.com/gopot/errors/detalizers_test.Test_NewCallStackDetalizerHappyPath.func1.1 callStack_test.go:56") +
+		ExpectedValueString: fmt.Sprintln("") + fmt.Sprintln("\tgithub.com/gopot/errors/detalizers_test.Test_NewCallStackDetalizerHappyPath.func1.1 callStack_test.go:59") +
 			fmt.Sprintln("\tgithub.com/gopot/errors/detalizers_test.C callStack_test.go:28") +
 			fmt.Sprintln("\tgithub.com/gopot/errors/detalizers_test.B callStack_test.go:26") +
 			fmt.Sprintln("\tgithub.com/gopot/errors/detalizers_test.A callStack_test.go:24") +
-			fmt.Sprintln("\tgithub.com/gopot/errors/detalizers_test.Test_NewCallStackDetalizerHappyPath.func1 callStack_test.go:59"),
+			fmt.Sprintln("\tgithub.com/gopot/errors/detalizers_test.Test_NewCallStackDetalizerHappyPath.func1 callStack_test.go:62"),
 	}
 
 	testFn := func(t *testing.T) {
@@ -88,6 +91,9 @@ func Test_NewCallStackDetalizerHappyPath(t *testing.T) {
 }
 
 func Test_NewCallStackDetalizerTooMuchToSkip(t *testing.T) {
+
+	t.Parallel()
+
 	testCase := struct {
 		TestAlias       string
 		SkipFrames      int
@@ -126,6 +132,6 @@ func Test_CallStackDetailKeyStringer(t *testing.T) {
 	var callStackDetailKeyStringer fmt.Stringer = detalizers.CallStackDetailKey
 
 	if callStackDetailKeyStringer.String() != CALLSTACK_DETAIL_KEY_STRING {
-		t.Error("detalizers.CallStackDetailKey.String() is %s \r\n while expected %s", callStackDetailKeyStringer.String(), CALLSTACK_DETAIL_KEY_STRING)
+		t.Error("detalizers.CallStackDetailKey.String() is %s \r\n while expected %s", callStackDetailKeyStringer.String(), string(CALLSTACK_DETAIL_KEY_STRING))
 	}
 }
